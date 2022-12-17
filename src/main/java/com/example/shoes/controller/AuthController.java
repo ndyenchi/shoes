@@ -7,8 +7,10 @@ import com.example.shoes.entity.Role;
 import com.example.shoes.entity.User;
 import com.example.shoes.repository.RoleRepository;
 import com.example.shoes.repository.UserRepository;
+import com.example.shoes.response.GeneralApiAResponse;
 import com.example.shoes.service.impl.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.http.HttpClient;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -40,7 +43,7 @@ public class AuthController {
 	JwtUtils jwtUtils;
 
 	@PostMapping("/signin")
-	public ResponseEntity<?> authenticateUser(@Validated @RequestBody LoginRequest loginRequest) {
+	public GeneralApiAResponse<?> authenticateUser(@Validated @RequestBody LoginRequest loginRequest) {
 
 		Authentication authentication = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
@@ -53,33 +56,33 @@ public class AuthController {
 				.map(item -> item.getAuthority())
 				.collect(Collectors.toList());
 
-		return ResponseEntity.ok(new JwtResponse(jwt,
+		return new GeneralApiAResponse("SUCCESS", HttpStatus.OK,new JwtResponse(jwt,
 												 userDetails.getId(),
 				                                 userDetails.getUsername(),
 												 userDetails.getEmail(),
 												 roles));
 	}
 	@PostMapping("/signup")
-	public ResponseEntity<?> registerUser(@Validated @RequestBody SignupRequest signUpRequest) {
+	public GeneralApiAResponse<?> registerUser(@Validated @RequestBody SignupRequest signUpRequest) {
 
         if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: Email is already in use!"));
+            return new GeneralApiAResponse<>("Error: Email is already in use!", HttpStatus.BAD_REQUEST,null);
         }
         User user = new User(signUpRequest.getusername(),
                 signUpRequest.getEmail(),
                 encoder.encode(signUpRequest.getPassword()));
 
         Set<Role> roles = new HashSet<>();
-        Role userRole = roleRepository.findByName(ERole.USER)
-                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-        roles.add(userRole);
+
+		Optional<Role>userRole = roleRepository.findByName(ERole.USER);
+		if(!userRole.isPresent()){
+			return new GeneralApiAResponse<>("Error: Role is not found.", HttpStatus.BAD_REQUEST,null);
+		}
+		roles.add(userRole.get());
         user.setRoles(roles);
 		Date today = Calendar.getInstance().getTime();
 		user.setCreateDate(today);
         userRepository.save(user);
-
-        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
-    }
+		return new GeneralApiAResponse<>("User registered successfully", HttpStatus.OK,user);
+	}
 }
