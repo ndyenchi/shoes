@@ -10,7 +10,15 @@ public class JwtResponse {
 	private String email;
 	private List<String> roles;
 
-	public JwtResponse(String token, int id,String username, String email, List<String> roles) {
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public JwtResponse(String token, int id, String username, String email, List<String> roles) {
 		super();
 		this.token = token;
 		this.id = id;

@@ -1,24 +1,28 @@
 package com.example.shoes.service.impl;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 import com.example.shoes.entity.User;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class UserDetailsImpl implements UserDetails {
-    private Integer id;
-    private String username;
-    private String email;
-    @JsonIgnore
-    private String password;
+	private static final long serialVersionUID = 1L;
 
-    private Collection<? extends GrantedAuthority> authorities;
+	private Integer id;
+	private String username;
+
+	private String email;
+
+	@JsonIgnore
+	private String password;
+
+	private Collection<? extends GrantedAuthority> authorities;
 
     public UserDetailsImpl(int id, String username, String email, String password,
                            Collection<? extends GrantedAuthority> authorities){
@@ -41,12 +45,10 @@ public class UserDetailsImpl implements UserDetails {
                 authorities);
     }
 
-
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return authorities;
-    }
+	@Override
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		return authorities;
+	}
 
 
 
@@ -84,8 +86,18 @@ public class UserDetailsImpl implements UserDetails {
         return true;
     }
 
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
+	@Override
+	public boolean isEnabled() {
+		return true;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		UserDetailsImpl user = (UserDetailsImpl) o;
+		return Objects.equals(id, user.id);
+	}
 }

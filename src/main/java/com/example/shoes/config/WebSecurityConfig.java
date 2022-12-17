@@ -26,11 +26,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	UserDetailsServiceImpl userDetailsService;
 
 	@Autowired
-	private com.example.shoes.config.AuthEntryPointJwt unauthorizedHandler;
+	private AuthEntryPointJwt unauthorizedHandler;
 
 	@Bean
-	public com.example.shoes.config.AuthTokenFilter authenticationJwtTokenFilter() {
-		return new com.example.shoes.config.AuthTokenFilter();
+	public AuthTokenFilter authenticationJwtTokenFilter() {
+		return new AuthTokenFilter();
 	}
 
 	@Override
@@ -52,11 +52,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http.cors().and().csrf().disable()
-				.exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
-				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-				.authorizeRequests().antMatchers("/**").permitAll()
-				.antMatchers("/api/auth/**").permitAll()
-				.anyRequest().authenticated();
+			.exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
+			.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+			.authorizeRequests().antMatchers("/**").permitAll()
+			.antMatchers("/api/test/**").permitAll()
+				.antMatchers("/api/forgot/password/**").permitAll()
+			.anyRequest().authenticated();
 
 		http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 	}
