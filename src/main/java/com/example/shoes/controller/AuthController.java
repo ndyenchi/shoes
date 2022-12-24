@@ -2,6 +2,7 @@ package com.example.shoes.controller;
 
 import com.example.shoes.common.ERole;
 import com.example.shoes.common.JwtUtils;
+import com.example.shoes.common.StatusCode;
 import com.example.shoes.dto.*;
 import com.example.shoes.entity.Role;
 import com.example.shoes.entity.User;
@@ -56,17 +57,14 @@ public class AuthController {
 				.map(item -> item.getAuthority())
 				.collect(Collectors.toList());
 
-		return new GeneralApiAResponse("SUCCESS", HttpStatus.OK,new JwtResponse(jwt,
-												 userDetails.getId(),
-				                                 userDetails.getUsername(),
-												 userDetails.getEmail(),
-												 roles));
+		return new GeneralApiAResponse(StatusCode.SUCCESS, HttpStatus.OK,
+				new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(),userDetails.getEmail(), roles));
 	}
 	@PostMapping("/signup")
 	public GeneralApiAResponse<?> registerUser(@Validated @RequestBody SignupRequest signUpRequest) {
 
         if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-            return new GeneralApiAResponse<>("Error: Email is already in use!", HttpStatus.BAD_REQUEST,null);
+            return new GeneralApiAResponse<>(StatusCode.EMAIL_EXSITED, HttpStatus.BAD_REQUEST,null);
         }
         User user = new User(signUpRequest.getusername(),
                 signUpRequest.getEmail(),
@@ -76,13 +74,13 @@ public class AuthController {
 
 		Optional<Role>userRole = roleRepository.findByName(ERole.USER);
 		if(!userRole.isPresent()){
-			return new GeneralApiAResponse<>("Error: Role is not found.", HttpStatus.BAD_REQUEST,null);
+			return new GeneralApiAResponse<>(StatusCode.ROLE_NOT_FOUND, HttpStatus.BAD_REQUEST,null);
 		}
 		roles.add(userRole.get());
         user.setRoles(roles);
 		Date today = Calendar.getInstance().getTime();
 		user.setCreateDate(today);
         userRepository.save(user);
-		return new GeneralApiAResponse<>("User registered successfully", HttpStatus.OK,user);
+		return new GeneralApiAResponse<>(StatusCode.SUCCESS, HttpStatus.OK,user);
 	}
 }
