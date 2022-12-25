@@ -1,4 +1,9 @@
-package com.example.shoes.response;
+package com.example.shoes.repository;
 
-public interface LeftMenuRepository extends org.springframework.data.jpa.repository.JpaRepository<com.example.shoes.entity.LeftMenu, int> {
+import com.example.shoes.entity.LeftMenu;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface LeftMenuRepository extends JpaRepository<LeftMenu, Integer> {
 }
